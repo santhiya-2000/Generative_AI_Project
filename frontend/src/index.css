@@ -1,17 +1,67 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Bradley Hand', cursive, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --primary-color: #FF69B4;
+  --secondary-color: #4169E1;
+  --accent-color: #87CEEB;
+  --text-color: #333333;
+  --bg-gradient: linear-gradient(135deg, #FFB6C1, #87CEEB);
+  --paper-color: #FFFFFF;
+  --border-color: #DDA0DD;
+  --shadow-color: rgba(255, 105, 180, 0.2);
+  --button-color: #32CD32;
+  --button-hover: #228B22;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-color);
+  background: var(--bg-gradient);
 }
+
+#root {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+#root::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,105,180,0.1) 0%, transparent 70%),
+              radial-gradient(circle, rgba(65,105,225,0.1) 0%, transparent 70%),
+              radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+  animation: floatingBubbles 20s ease-in-out infinite;
+  z-index: -1;
+}
+
+@keyframes floatingBubbles {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(120deg); }
+  66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+
+#root::after {
+  content: '✨ 🌟 🦄 🌈 🎨 📚 🎭 🎪 🎯 🚀 🌸 🦋';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  opacity: 0.3;
+  animation: sparkleFloat 15s linear infinite;
+  z-index: -1;
+}
+
+@keyframes sparkleFloat {
+  0% { transform: translateY(0) rotate(0deg); }
+  100% { transform: translateY(-100vh) rotate(360deg); }
+}
+
 
 a {
   font-weight: 500;
@@ -24,31 +74,47 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: var(--primary-color);
+  text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.8em 1.5em;
   font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-family: 'Georgia', serif;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--accent-color), var(--secondary-color));
+  color: white;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
+
 button:hover {
-  border-color: #646cff;
+  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;

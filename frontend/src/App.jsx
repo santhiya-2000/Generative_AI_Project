@@ -1,89 +1,211 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaBookOpen, FaPlay, FaArrowLeft, FaArrowRight, FaRedo, FaCog } from "react-icons/fa";
 import "./App.css";
 
 function App() {
-  const [prompt, setPrompt] = useState("");
-  const [count, setCount] = useState(1);
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [storyPrompt, setStoryPrompt] = useState("");
+  const [numScenes, setNumScenes] = useState(3);
+  const [story, setStory] = useState(null);
+  const [currentScene, setCurrentScene] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleGenerate = async () => {
-    if (!prompt) return alert("Enter a story prompt!");
-    setLoading(true);
-    const form = new FormData();
-    form.append("prompt", prompt);
-    form.append("count", count);
+  const generateStory = async () => {
+    if (!storyPrompt.trim()) return;
+    
+    setIsGenerating(true);
+    try {
+      const formData = new FormData();
+      formData.append('prompt', storyPrompt);
+      formData.append('count', numScenes);
+      
+      const response = await fetch('http://127.0.0.1:8000/generate', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      setStory(data);
+      setCurrentScene(0);
+    } catch (error) {
+      console.error('Error generating story:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-    const res = await fetch("http://127.0.0.1:8000/generate", {
-      method: "POST",
-      body: form,
-    });
-    const data = await res.json();
-    setImages(data.images);
-    setLoading(false);
+  const nextScene = () => {
+    if (currentScene < story.images.length - 1) {
+      setCurrentScene(currentScene + 1);
+    }
+  };
+
+  const prevScene = () => {
+    if (currentScene > 0) {
+      setCurrentScene(currentScene - 1);
+    }
+  };
+
+  const resetStory = () => {
+    setStory(null);
+    setCurrentScene(0);
+    setStoryPrompt("");
   };
 
   return (
-    <div style={{ textAlign: "center", padding: "30px" }}>
-      <h1>AI Story Illustrator</h1>
-      <textarea
-        rows="3"
-        cols="60"
-        placeholder="Enter your story idea..."
-        value={prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-        style={{ margin: "10px" }}
-      />
-      <br />
-      <label>Number of Scenes: </label>
-      <input
-        type="number"
-        min="1"
-        max="10"
-        value={count}
-        onChange={(e) => setCount(e.target.value)}
-      />
-      <br /><br />
-      <button
-        onClick={handleGenerate}
-        disabled={loading}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007bff",
-          color: "#fff",
-          border: "none",
-          borderRadius: "8px",
-        }}
-      >
-        {loading ? "Generating..." : "Generate Story"}
-      </button>
-
-      <div style={{ marginTop: "40px" }}>
-        {images.length > 0 && <h2>Story Scenes</h2>}
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "20px",
-          }}
-        >
-          {images.map((img, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <h3>Scene {i + 1}</h3>
-              <img
-                src={`http://127.0.0.1:8000/image/${img.split("/").pop()}`}
-                alt={`Scene ${i + 1}`}
-                style={{
-                  width: "512px",
-                  borderRadius: "10px",
-                  boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-                }}
-              />
-            </div>
-          ))}
+    <div className="app-container">
+      <header className="app-header">
+        <div className="header-content">
+          <div className="logo">
+            <FaBookOpen className="logo-icon" />
+            <h1>StoryIllustrator AI</h1>
+          </div>
         </div>
-      </div>
+        <div className="header-info">
+          <p>AI-Powered Story Generation with Illustrations</p>
+        </div>
+      </header>
+
+      <main className="main-content">
+        <AnimatePresence mode="wait">
+          {!story ? (
+            <motion.div 
+              className="creator-panel"
+              key="creator"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="panel-header">
+                <h2>Create New Story</h2>
+                <p>Enter a story prompt and generate AI-powered illustrations</p>
+              </div>
+
+              <div className="input-group">
+                <label htmlFor="story-prompt">Story Prompt</label>
+                <textarea
+                  id="story-prompt"
+                  value={storyPrompt}
+                  onChange={(e) => setStoryPrompt(e.target.value)}
+                  placeholder="Describe your story concept... (e.g., 'A brave knight discovers a hidden forest filled with magical creatures')"
+                  rows={6}
+                />
+              </div>
+
+              <div className="options-group">
+                <div className="option-item">
+                  <label htmlFor="scene-count">Number of Scenes</label>
+                  <select 
+                    id="scene-count" 
+                    value={numScenes} 
+                    onChange={(e) => setNumScenes(parseInt(e.target.value))}
+                  >
+                    <option value={1}>1 Scene</option>
+                    <option value={2}>2 Scenes</option>
+                    <option value={3}>3 Scenes</option>
+                    <option value={4}>4 Scenes</option>
+                    <option value={5}>5 Scenes</option>
+                  </select>
+                </div>
+              </div>
+
+              <motion.button
+                className="generate-button"
+                onClick={generateStory}
+                disabled={!storyPrompt.trim() || isGenerating}
+                whileHover={{ scale: storyPrompt.trim() && !isGenerating ? 1.02 : 1 }}
+                whileTap={{ scale: storyPrompt.trim() && !isGenerating ? 0.98 : 1 }}
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="loading-spinner"></div>
+                    Generating Story...
+                  </>
+                ) : (
+                  <>
+                    <FaPlay /> Generate Story
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div 
+              className="viewer-panel"
+              key="viewer"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="viewer-header">
+                <div className="viewer-title">
+                  <h2>Generated Story</h2>
+                  <span className="scene-counter">Scene {currentScene + 1} of {story.images.length}</span>
+                </div>
+                <button className="reset-button" onClick={resetStory}>
+                  <FaRedo /> New Story
+                </button>
+              </div>
+
+              <div className="story-content">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentScene}
+                    className="scene-panel"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="illustration-container">
+                      <img 
+                        src={`http://127.0.0.1:8000/image/${story.images[currentScene]}`}
+                        alt={`Scene ${currentScene + 1}`}
+                        className="illustration"
+                      />
+                    </div>
+                    <div className="story-text">
+                      <h3>Scene {currentScene + 1}</h3>
+                      <p>{story.story[currentScene]}</p>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <div className="viewer-controls">
+                <button 
+                  className="control-button prev" 
+                  onClick={prevScene}
+                  disabled={currentScene === 0}
+                >
+                  <FaArrowLeft /> Previous
+                </button>
+                
+                <div className="scene-indicators">
+                  {story.images.map((_, index) => (
+                    <button
+                      key={index}
+                      className={`indicator ${index === currentScene ? 'active' : ''}`}
+                      onClick={() => setCurrentScene(index)}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                </div>
+                
+                <button 
+                  className="control-button next" 
+                  onClick={nextScene}
+                  disabled={currentScene === story.images.length - 1}
+                >
+                  Next <FaArrowRight />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 }

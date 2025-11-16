@@ -16,7 +16,23 @@ app.add_middleware(
 
 @app.post("/generate")
 def generate(prompt: str = Form(...), count: int = Form(1)):
-    return {"images": illustrator.generate(prompt, count)}
+    # Split prompt into sentences for story text
+    import re
+    sentences = [s.strip() for s in re.split(r"[.!?]+", prompt) if s.strip()]
+    if not sentences:
+        sentences = [prompt.strip()]
+    
+    # Limit to requested count
+    if count > 0:
+        sentences = sentences[:count]
+    
+    # Generate images
+    images = illustrator.generate(prompt, count)
+    
+    return {
+        "story": sentences,
+        "images": images
+    }
 
 @app.get("/image/{filename}")
 def get_image(filename: str):
