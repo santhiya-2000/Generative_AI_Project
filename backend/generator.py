@@ -4,10 +4,13 @@ import torch, os, time, gc, re
 
 class StoryIllustrator:
     def __init__(self, model_id="stabilityai/sd-turbo"):
+        # Determine if CUDA (GPU) is available for faster processing
         device = "cuda" if torch.cuda.is_available() else "cpu"
+        # Create static directory for storing generated images
         os.makedirs("static", exist_ok=True)
         print(f"Using device: {device} ({torch.cuda.get_device_name(0) if device=='cuda' else 'CPU'})")
 
+        # Store device and initialize Stable Diffusion pipeline
         self.device = device
         self.pipe = StableDiffusionPipeline.from_pretrained(
             model_id,
@@ -15,7 +18,7 @@ class StoryIllustrator:
             safety_checker=None,
         ).to(device)
 
-        # Demographic groups for flexible bias analysis (similar to code 2)
+        # Demographic groups for flexible bias analysis 
         self.demographic_groups = {
             "gender": ["a man", "a woman", "a non-binary person"],
             "ethnicity": [
@@ -29,7 +32,7 @@ class StoryIllustrator:
         }
 
     # ---------------------------------------------------------
-    # 1) ORIGINAL STORY GENERATION (prompt + num_images)
+    # 1) ORIGINAL STORY GENERATION
     # ---------------------------------------------------------
     def generate(self, prompt, num_images=1):
         start = time.time()
@@ -65,7 +68,7 @@ class StoryIllustrator:
         return paths
 
     # ---------------------------------------------------------
-    # 2) STORYLINE MODE: each sentence = one scene (with characters)
+    # 2) STORYLINE MODE: each sentence = one scene 
     # ---------------------------------------------------------
     def generate_storyline(self, story_text, character_description, max_scenes=None):
         """
@@ -113,7 +116,6 @@ class StoryIllustrator:
         print(f"Generated storyline with {len(paths)} scenes in {time.time() - start:.2f}s")
         return paths
 
-    # Small helper so your report can say “generate_story(prompt, num_images)”
     def generate_story(self, prompt, num_images=1):
         """
         Wrapper similar to code 2: splits prompt into sentences
@@ -137,7 +139,7 @@ class StoryIllustrator:
         return self.generate_storyline(story_text, character_description, max_scenes=len(sentences))
 
     # ---------------------------------------------------------
-    # 3) STYLE TRANSFER WITH DIFFUSION (prompt-based)
+    # 3) STYLE TRANSFER WITH DIFFUSION
     # ---------------------------------------------------------
     def style_transfer(self, content_prompt, style_prompt, num_images=1):
         """
@@ -174,7 +176,7 @@ class StoryIllustrator:
         return paths
 
     # ---------------------------------------------------------
-    # 4) BIAS & FAIRNESS ANALYSIS (flexible like code 2)
+    # 4) BIAS & FAIRNESS ANALYSIS 
     # ---------------------------------------------------------
     def generate_bias_grid(self, base_prompt, attribute_type="gender", per_value=1):
         """

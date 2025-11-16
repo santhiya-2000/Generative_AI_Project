@@ -16,13 +16,11 @@ app.add_middleware(
 
 @app.post("/generate")
 def generate(prompt: str = Form(...), count: int = Form(1)):
-    # Split prompt into sentences for story text
     import re
     sentences = [s.strip() for s in re.split(r"[.!?]+", prompt) if s.strip()]
     if not sentences:
         sentences = [prompt.strip()]
     
-    # Limit to requested count
     if count > 0:
         sentences = sentences[:count]
     
@@ -36,4 +34,5 @@ def generate(prompt: str = Form(...), count: int = Form(1)):
 
 @app.get("/image/{filename}")
 def get_image(filename: str):
+    # Serve generated images from static directory
     return FileResponse(f"static/{filename}")
