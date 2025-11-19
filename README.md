@@ -1,4 +1,4 @@
-#  StoryIllustrator AI - Kids Storybook Generator
+#  StoryIllustrator AI - Storybook Generator
 
 A magical AI-powered storybook application that creates illustrated stories for children! Watch as your story ideas come to life with beautiful AI-generated images and kid-friendly animations.
 
